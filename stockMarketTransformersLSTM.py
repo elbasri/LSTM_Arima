@@ -363,6 +363,8 @@ callbacks=[early_stopping, model_checkpoint],
 verbose=1)
 
 # Plot training and validation loss
+plt.figure(figsize=(10,6))
+plt.grid(True)
 plt.plot(history.history['loss'], label='Training Loss')
 plt.plot(history.history['val_loss'], label='Validation Loss')
 plt.xlabel('Epochs')
@@ -370,3 +372,176 @@ plt.ylabel('Loss')
 plt.title('Training and Validation Loss')
 plt.legend()
 plt.show()
+
+# Load best model from checkpoint
+best_model = Sequential()
+best_model.add(LSTM(64, return_sequences=True, input_shape=(train_data_normalized.shape[1], 1)))
+best_model.add(Dropout(0.2))
+best_model.add(LSTM(32, return_sequences=True))
+best_model.add(Dropout(0.2))
+best_model.add(LSTM(16))
+best_model.add(Dropout(0.2))
+best_model.add(Dense(1))
+best_model.compile(loss='mean_squared_error', optimizer='adam')
+best_model.load_weights('best_model.keras')
+
+# Make predictions on test data
+predictions_normalized = best_model.predict(test_data_normalized.reshape((test_data_normalized.shape[0], test_data_normalized.shape[1], 1)))
+predictions = scaler.inverse_transform(predictions_normalized)
+
+# Calculate MSE, MAE, and R-squared
+mse = mean_squared_error(test_data_normalized, predictions_normalized)
+mae = mean_absolute_error(test_data_normalized, predictions_normalized)
+r2 = r2_score(test_data_normalized, predictions_normalized)
+
+print(f'MSE: {mse}')
+print(f'MAE: {mae}')
+print(f'R-squared: {r2}')
+
+
+plt.figure(figsize=(10,6))
+plt.plot(train_data_close.index, train_data_close, color='green', label='Train data')
+plt.plot(test_data_close.index, test_data_close, color='blue', label='Test data')
+plt.plot(test_data_close.index, predictions, color='red', label='Predictions')
+plt.xlabel('Date')
+plt.ylabel('Closing Prices')
+plt.title('LSTM Predictions of CIH')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+
+# Load best model from checkpoint
+best_model = Sequential()
+best_model.add(LSTM(64, return_sequences=True, input_shape=(train_data_normalized.shape[1], 1)))
+best_model.add(Dropout(0.2))
+best_model.add(LSTM(32, return_sequences=True))
+best_model.add(Dropout(0.2))
+best_model.add(LSTM(16))
+best_model.add(Dropout(0.2))
+best_model.add(Dense(1))
+best_model.compile(loss='mean_squared_error', optimizer='adam')
+best_model.load_weights('best_model.keras')
+
+# Make predictions on test data
+predictions_normalized = best_model.predict(test_data_normalized.reshape((test_data_normalized.shape[0], test_data_normalized.shape[1], 1)))
+predictions = scaler.inverse_transform(predictions_normalized)
+
+# Calculate MSE, MAE, and R-squared
+mse = mean_squared_error(test_data_normalized, predictions_normalized)
+mae = mean_absolute_error(test_data_normalized, predictions_normalized)
+r2 = r2_score(test_data_normalized, predictions_normalized)
+
+print(f'MSE: {mse}')
+print(f'MAE: {mae}')
+print(f'R-squared: {r2}')
+
+
+plt.figure(figsize=(10,6))
+plt.plot(train_data_close.index, train_data_close, color='green', label='Train data')
+plt.plot(test_data_close.index, test_data_close, color='blue', label='Test data')
+plt.plot(test_data_close.index, predictions, color='red', label='Predictions')
+plt.xlabel('Date')
+plt.ylabel('Closing Prices')
+plt.title('LSTM Predictions of CIH')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
+
+# Split BCP data into train and test sets
+train_data, test_data = company_dfs[1].iloc[:int(len(company_dfs[1]) * 0.9)], company_dfs[1].iloc[int(len(company_dfs[1]) * 0.9):]
+
+# Extract 'Close' column for training and testing
+train_data_close = train_data['Close']
+test_data_close = test_data['Close']
+
+# Normalize the data using MinMaxScaler
+scaler = MinMaxScaler()
+train_data_normalized = scaler.fit_transform(np.array(train_data_close).reshape(-1, 1))
+test_data_normalized = scaler.transform(np.array(test_data_close).reshape(-1, 1))
+
+# Define LSTM model architecture
+model = Sequential([
+    LSTM(64, return_sequences=True, input_shape=(train_data_normalized.shape[1], 1)),
+    Dropout(0.2),
+    LSTM(32, return_sequences=True),
+    Dropout(0.2),
+    LSTM(16),
+    Dropout(0.2),
+    Dense(1)
+])
+
+# Compile the model
+model.compile(loss='mean_squared_error', optimizer='adam')
+
+# Define callbacks for early stopping and model checkpoint
+early_stopping = EarlyStopping(monitor='val_loss', patience=5, verbose=1, mode='min')
+model_checkpoint = ModelCheckpoint('best_model_bcp.keras', monitor='val_loss', verbose=1, save_best_only=True, mode='min')
+
+# Train the model
+history = model.fit(
+    x=train_data_normalized.reshape((train_data_normalized.shape[0], train_data_normalized.shape[1], 1)),
+    y=train_data_normalized,
+    epochs=50,
+    batch_size=32,
+    validation_split=0.1,
+    callbacks=[early_stopping, model_checkpoint],
+    verbose=1
+)
+
+# Plot training and validation loss
+plt.plot(history.history['loss'], label='Training Loss')
+plt.plot(history.history['val_loss'], label='Validation Loss')
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title('Training and Validation Loss for BCP')
+plt.legend()
+plt.show()
+
+
+
+# Load best model from checkpoint for BCP
+best_model = Sequential()
+best_model.add(LSTM(64, return_sequences=True, input_shape=(train_data_normalized.shape[1], 1)))
+best_model.add(Dropout(0.2))
+best_model.add(LSTM(32, return_sequences=True))
+best_model.add(Dropout(0.2))
+best_model.add(LSTM(16))
+best_model.add(Dropout(0.2))
+best_model.add(Dense(1))
+best_model.compile(loss='mean_squared_error', optimizer='adam')
+
+# Load the best model weights saved during training for BCP
+best_model.load_weights('best_model_bcp.keras')
+
+# Make predictions on BCP test data
+predictions_normalized = best_model.predict(test_data_normalized.reshape((test_data_normalized.shape[0], test_data_normalized.shape[1], 1)))
+predictions = scaler.inverse_transform(predictions_normalized)
+
+# Calculate MSE, MAE, and R-squared for BCP predictions
+mse = mean_squared_error(test_data_close, predictions)
+mae = mean_absolute_error(test_data_close, predictions)
+r2 = r2_score(test_data_close, predictions)
+
+print(f'MSE: {mse}')
+print(f'MAE: {mae}')
+print(f'R-squared: {r2}')
+
+
+
+# Plot the training, testing, and prediction data for BCP
+plt.figure(figsize=(10, 6))
+plt.plot(train_data_close.index, train_data_close, color='green', label='Train Data (BCP)')
+plt.plot(test_data_close.index, test_data_close, color='blue', label='Test Data (BCP)')
+plt.plot(test_data_close.index, predictions, color='red', label='Predictions (BCP)')
+plt.xlabel('Date')
+plt.ylabel('Closing Prices')
+plt.title('LSTM Predictions of BCP')
+plt.legend()
+plt.grid(True)
+plt.show()
+
+
