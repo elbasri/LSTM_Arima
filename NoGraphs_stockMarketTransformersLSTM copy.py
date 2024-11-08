@@ -169,126 +169,11 @@ plt.subplots_adjust(top=1.25, bottom=0.8, hspace=0.3, wspace=0.2)
 # Obtenir les entreprises uniques
 companies = Df['Company'].unique()
 
-# Tracer les sous-graphiques pour chaque entreprise
-for i, company in enumerate(companies, 1):
-    company_df = Df[Df['Company'] == company]
-
-    plt.subplot(2, 2, i)  # Adapter (2, 2, i) selon le nombre d'entreprises pour organiser les sous-graphiques
-    plt.plot(company_df['Date'], company_df['Dernier'], color='blue', linewidth=2)
-    plt.title(f'Closing Price of {company} Stock', fontsize=12)
-    plt.xlabel('Date', fontsize=10)
-    plt.ylabel('Close Price', fontsize=10)
-    plt.xticks(rotation=45)
-
-    # Configurer l'affichage des dates
-    plt.gca().xaxis.set_major_locator(plt.MaxNLocator(12))  # Afficher au plus 12 ticks
-    plt.gca().xaxis.set_major_formatter(DateFormatter('%b %Y'))  # Format des dates (mois année)
-
-    # Masquer les bordures supérieures et droites
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
-    plt.gca().set_frame_on(False)
-
-plt.tight_layout()
-plt.show()
-
-
-# Paramètres de la figure
-plt.figure(figsize=(15, 10), facecolor='white', edgecolor='white')
-plt.subplots_adjust(top=1.25, bottom=0.8, hspace=0.3, wspace=0.2)
-
-# Obtenir les entreprises uniques
-companies = Df['Company'].unique()
-
-# Tracer les sous-graphiques pour chaque entreprise
-for i, company in enumerate(companies, 1):
-    company_df = Df[Df['Company'] == company]
-
-    plt.subplot(2, 2, i)  # Adapter (2, 2, i) selon le nombre d'entreprises pour organiser les sous-graphiques
-    plt.plot(company_df['Date'], company_df['Ouv.'], color='blue', linewidth=2)
-    plt.title(f'Opening Price of {company} Stock', fontsize=12)
-    plt.xlabel('Date', fontsize=10)
-    plt.ylabel('Open Price', fontsize=10)
-    plt.xticks(rotation=45)
-
-    # Configurer l'affichage des dates
-    plt.gca().xaxis.set_major_locator(plt.MaxNLocator(12))  # Afficher au plus 12 ticks
-    plt.gca().xaxis.set_major_formatter(DateFormatter('%b %Y'))  # Format des dates (mois année)
-
-    # Masquer les bordures supérieures et droites
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
-    plt.gca().set_frame_on(False)
-
-plt.tight_layout()
-plt.show()
-
-
-# Paramètres de la figure
-plt.figure(figsize=(20, 14), facecolor='white', edgecolor='white')
-plt.subplots_adjust(top=1.25, bottom=0.8, hspace=0.3, wspace=0.2)
-
-# Obtenir les entreprises uniques
-companies = Df['Company'].unique()
-
-# Tracer les sous-graphiques pour chaque entreprise
-for i, company in enumerate(companies, 1):
-    company_df = Df[Df['Company'] == company]
-
-    # Calculer la différence entre le prix de clôture et d'ouverture
-    company_df['Difference'] = company_df['Dernier'] - company_df['Ouv.']
-
-    plt.subplot(2, 2, i)  # Adapter (2, 2, i) selon le nombre d'entreprises pour organiser les sous-graphiques
-
-    # Tracer le prix d'ouverture en vert
-    plt.plot(company_df['Date'], company_df['Ouv.'], color='green', linewidth=2, label='Opening Price')
-
-    # Tracer le prix de clôture en bleu
-    plt.plot(company_df['Date'], company_df['Dernier'], color='blue', linewidth=2, label='Closing Price')
-
-    # Tracer la différence en rouge
-    plt.plot(company_df['Date'], company_df['Difference'], color='red', linewidth=2, label='Difference (Close - Open)')
-
-    plt.title(f'Opening, Closing Price and Difference for {company} Stock', fontsize=12)
-    plt.xlabel('Date', fontsize=10)
-    plt.ylabel('Price', fontsize=10)
-    plt.xticks(rotation=45)
-
-    # Ajouter une légende
-    plt.legend()
-
-    # Configurer l'affichage des dates
-    plt.gca().xaxis.set_major_locator(plt.MaxNLocator(20))  # Afficher au plus 12 ticks
-    plt.gca().xaxis.set_major_formatter(DateFormatter('%b %Y'))  # Format des dates (mois année)
-
-    # Masquer les bordures supérieures et droites
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
-    plt.gca().set_frame_on(False)
-
-plt.tight_layout()
-plt.show()
-
 
 Df['Avg Daily Return'] = (Df['Dernier'] - Df['Ouv.']) / Df['Ouv.']
 pivot_df = Df.pivot_table(index='Date', columns='Company', values=['Avg Daily Return', 'Dernier', 'Vol.'])
 correlation_returns = pivot_df['Avg Daily Return'].corr()
 correlation_closing = pivot_df['Dernier'].corr()
-
-plt.figure(figsize=(12, 10), facecolor='white')
-
-plt.subplot(2, 2, 1)
-sns.heatmap(correlation_returns, annot=True, cmap='summer')
-plt.title('Correlation of Avg Daily Return', fontsize=10)
-
-plt.subplot(2, 2, 2)
-sns.heatmap(correlation_closing, annot=True, cmap='summer')
-plt.title('Correlation of Closing Price', fontsize=10)
-
-plt.tight_layout()
-plt.show()
-
-
 
 company_dfs = []
 for company in Df['Company'].unique():
@@ -302,30 +187,9 @@ for company in Df['Company'].unique():
 # Split data into train and test sets
 train_data, test_data = company_dfs[0].iloc[3:int(len(company_dfs[0])*0.9)], company_dfs[0].iloc[int(len(company_dfs[0])*0.9):]
 
-# Plotting
-plt.figure(figsize=(10,6))
-plt.grid(True)
-plt.xlabel('Dates')
-plt.ylabel('Closing Prices for CIH')
-plt.plot(train_data.index, train_data['Close'], 'green', label='Train data')
-plt.plot(test_data.index, test_data['Close'], 'blue', label='Test data')
-plt.legend()
-plt.show()
-
-
 # pour BCP
 # Split data into train and test sets
 train_data, test_data = company_dfs[1].iloc[3:int(len(company_dfs[1])*0.9)], company_dfs[1].iloc[int(len(company_dfs[1])*0.9):]
-
-# Plotting
-plt.figure(figsize=(10,6))
-plt.grid(True)
-plt.xlabel('Dates')
-plt.ylabel('Closing Prices for BCP')
-plt.plot(train_data.index, train_data['Close'], 'green', label='Train data')
-plt.plot(test_data.index, test_data['Close'], 'blue', label='Test data')
-plt.legend()
-plt.show()
 
 train_data, test_data = company_dfs[0].iloc[3:int(len(company_dfs[0])*0.9)], company_dfs[0].iloc[int(len(company_dfs[0])*0.9):]
 train_data_close = train_data['Close']
@@ -363,6 +227,8 @@ callbacks=[early_stopping, model_checkpoint],
 verbose=1)
 
 # Plot training and validation loss
+plt.figure(figsize=(10,6))
+plt.grid(True)
 plt.plot(history.history['loss'], label='Training Loss')
 plt.plot(history.history['val_loss'], label='Validation Loss')
 plt.xlabel('Epochs')
